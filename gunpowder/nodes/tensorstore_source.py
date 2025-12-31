@@ -218,7 +218,7 @@ class TensorstoreSource(BatchProvider):
         dataset_roi = request[self.key].roi / voxel_size
 
         # shift request roi into dataset
-        dataset_roi = dataset_roi + self.spec[self.key].roi.offset / voxel_size
+        dataset_roi = dataset_roi - self.spec[self.key].roi.offset / voxel_size
 
         # create array spec
         array_spec = self.spec[self.key].copy()
