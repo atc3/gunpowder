@@ -81,6 +81,9 @@ full = [
     'tensorflow<2.0; python_version<"3.8"',
     'protobuf==3.20.*; python_version=="3.7"',
 ]
+tensorstore = [
+    "tensorstore==0.1.79",
+]
 
 [tool.setuptools.dynamic]
 version = { attr = "gunpowder.version_info.__version__" }
