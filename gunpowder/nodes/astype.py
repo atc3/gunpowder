@@ -19,7 +19,7 @@ class AsType(BatchFilter):
 
         target_dtype (str or dtype):
 
-            The voxel size of the target.
+            The target datatype.
 
         target (:class:`ArrayKey`, optional):
 
