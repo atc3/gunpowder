@@ -176,7 +176,7 @@ class TensorstoreSource(BatchProvider):
                 % (spec.dtype, self.key, data_file.schema.dtype)
             )
         else:
-            spec.dtype = data_file.schema.dtype
+            spec.dtype = data_file.schema.dtype.numpy_dtype
 
         if spec.interpolatable is None:
             spec.interpolatable = np.issubdtype(spec.dtype, np.floating) or (
