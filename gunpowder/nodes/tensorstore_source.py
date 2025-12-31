@@ -56,8 +56,8 @@ class TensorstoreSource(BatchProvider):
         dim_order (``List[int]``, optional, default ``None``):
 
             The order in which to index data from the tensorstore dataset.
-            i.e., [0, 1, 2] will index in the same order as the provided ROI.
-            If not provided, default to `inner_order` of schema `chunk_layout`.
+            If not provided, default to None = [0, 1, ..., ndims] (will index
+            in the same order as the provided ROI).
     """
 
     def __init__(
@@ -124,14 +124,19 @@ class TensorstoreSource(BatchProvider):
 
         return Coordinate(domain.inclusive_min)
 
-    def _get_dim_order(self, data_file):
-        try:
-            chunk_layout = data_file.schema.chunk_layout
-        except AttributeError:
-            logger.debug("No chunk_layout found in dataset schema")
-            return None
+    # Maybe use this in the future but unclear if tensorstore schema
+    # stores the metadata to indicate if a file should be read in a different way
+    # For now just default to [0, 1, 2, ...] and let the user decide for any
+    # edge cases
 
-        return list(chunk_layout.inner_order)
+    # def _get_dim_order(self, data_file):
+    #     try:
+    #         chunk_layout = data_file.schema.chunk_layout
+    #     except AttributeError:
+    #         logger.debug("No chunk_layout found in dataset schema")
+    #         return None
+
+    #     return list(chunk_layout.inner_order)
 
     def __read_spec(self, data_file):
         if self.array_spec is not None:
@@ -187,7 +192,8 @@ class TensorstoreSource(BatchProvider):
             )
 
         if self.dim_order is None:
-            self.dim_order = self._get_dim_order(data_file)
+            self.dim_order = list(range(self.ndims))
+            # self.dim_order = self._get_dim_order(data_file)
 
         return spec
 
