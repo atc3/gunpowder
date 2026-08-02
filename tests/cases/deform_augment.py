@@ -7,6 +7,7 @@ from gunpowder import (
     ArrayKey,
     ArraySource,
     ArraySpec,
+    BatchProvider,
     BatchRequest,
     Coordinate,
     DeformAugment,
@@ -14,7 +15,6 @@ from gunpowder import (
     GraphKey,
     GraphSpec,
     MergeProvider,
-    Pipeline,
     Roi,
     build,
 )
@@ -45,12 +45,14 @@ def mock_3d_source():
         voxel_size=Coordinate((4, 1, 1)),
         interpolatable=False,
     )
+    assert array_spec1.roi is not None and array_spec1.voxel_size is not None
     data1 = np.zeros((array_spec1.roi.shape // array_spec1.voxel_size), dtype=np.uint32)
     array_spec2 = ArraySpec(
         roi=Roi((-100, -100, -100), (200, 200, 200)),
         voxel_size=Coordinate((1, 2, 1)),
         interpolatable=False,
     )
+    assert array_spec2.roi is not None and array_spec2.voxel_size is not None
     data2 = np.zeros((array_spec2.roi.shape // array_spec2.voxel_size), dtype=np.uint32)
     for node in nodes:
         loc = node_to_voxel(array_spec1.roi, array_spec1.voxel_size, node.location)
@@ -142,7 +144,7 @@ def test_3d_basics(
 
 
 @pytest.fixture
-def mock_4d_source() -> Pipeline:
+def mock_4d_source() -> BatchProvider:
     points = GraphKey("points")
     nodes = [
         Node(0, np.array([0, 0, 0, 0])),
@@ -182,3 +184,38 @@ def test_4d_basics(mock_4d_source):
         points_data = batch[points]
         # not enough deformation to remove node from center
         assert len(list(points_data.nodes)) == 1
+
+
+@pytest.mark.parametrize(
+    "array_voxel_size, control_point_spacing",
+    [
+        ((4, 4, 4), (4, 4, 4)),  # equal: regression for sampled-unbound bug
+        ((8, 8, 8), (4, 4, 4)),  # array voxel coarser than control points
+    ],
+)
+def test_sample_transform_voxel_size_relations(array_voxel_size, control_point_spacing):
+    array_spec = ArraySpec(
+        roi=Roi((-128, -128, -128), (256, 256, 256)),
+        voxel_size=Coordinate(array_voxel_size),
+        interpolatable=False,
+    )
+    assert array_spec.roi is not None and array_spec.voxel_size is not None
+    data = np.zeros(array_spec.roi.shape // array_spec.voxel_size, dtype=np.uint32)
+    array = Array(data, offset=array_spec.roi.offset, voxel_size=array_spec.voxel_size)
+    source = ArraySource(ArrayKey("A"), array)
+    pipeline = source + DeformAugment(
+        control_point_spacing=Coordinate(control_point_spacing),
+        jitter_sigma=[1, 1, 1],
+        spatial_dims=3,
+        rotate=False,
+        use_fast_points_transform=False,
+        subsample=1,
+    )
+
+    request = BatchRequest()
+    request_roi = Roi((-32, -32, -32), (64, 64, 64))
+    request[ArrayKey("A")] = ArraySpec(roi=request_roi)
+
+    with build(pipeline):
+        batch = pipeline.request_batch(request)
+    assert batch[ArrayKey("A")].spec.roi == request_roi
