@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from .add_affinities import AddAffinities
+from .add_distance import AddDistance
 from .array_source import ArraySource
 from .astype import AsType
 from .balance_labels import BalanceLabels
@@ -44,6 +45,7 @@ from .snapshot import Snapshot
 from .specified_location import SpecifiedLocation
 from .squeeze import Squeeze
 from .stack import Stack
+from .tensorstore_source import TensorstoreSource
 from .unsqueeze import Unsqueeze
 from .upsample import UpSample
 from .zarr_source import ZarrSource

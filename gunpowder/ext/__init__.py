@@ -92,4 +92,9 @@ except ImportError:
 try:
     import optax  # ty: ignore[unresolved-import]
 except ImportError:
-    optax = NoSuchModule("optax")
+    optax = NoSuchModule("optax")  # type: ignore
+
+try:
+    import tensorstore
+except ImportError:
+    tensorstore = NoSuchModule("tensorstore")  # type: ignore
