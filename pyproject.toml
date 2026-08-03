@@ -42,6 +42,7 @@ dependencies = [
     "networkx>=3.1",
     "funlib.persistence>=0.7",
     "iohub>=0.3",
+    "edt",
 ]
 
 [project.optional-dependencies]

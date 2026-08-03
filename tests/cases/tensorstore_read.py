@@ -137,3 +137,68 @@ def test_read(tmp_path):
         assert roi_raw.offset == batch[raw_key].spec.roi.offset
         assert voxel_size == batch[raw_key].spec.voxel_size
         assert (raw_data == batch.arrays[raw_key].data).all()
+
+
+@pytest.mark.skipif(isinstance(ts, NoSuchModule), reason="tensorstore is not installed")
+def test_read_reuses_open_dataset_handle(tmp_path):
+    """TensorstoreSource.provide() used to call ts.open(...) on every single
+    read, which forces a fresh (and thus empty) cache_pool each time even if
+    one is configured -- see AddDistance/AddDistance-adjacent notebooks in
+    3dem for the ~170x slowdown this caused in practice. Guard against a
+    regression back to reopening per read, and confirm repeated reads
+    through the same built source still return correct data."""
+
+    key = ArrayKey("RAW")
+    voxel_size = Coordinate(1, 1, 1)
+    shape = (64, 64, 64)
+    data = (np.arange(np.prod(shape)) % 256).astype(np.uint8).reshape(shape)
+
+    dataset = ts.open(
+        {
+            "driver": "n5",
+            "dtype": "uint8",
+            "kvstore": {"driver": "file", "path": str(tmp_path / "raw_dataset/")},
+            "metadata": {
+                "compression": {"type": "gzip"},
+                "dataType": "uint8",
+                "dimensions": list(shape),
+                "blockSize": [32, 32, 32],
+            },
+            "create": True,
+            "delete_existing": True,
+        }
+    ).result()
+    dataset[:] = data
+
+    source = TensorstoreSource(
+        key,
+        {
+            "driver": "n5",
+            "kvstore": {"driver": "file", "path": str(tmp_path / "raw_dataset/")},
+        },
+        array_spec=ArraySpec(Roi((0, 0, 0), shape), voxel_size),
+        dim_order=[0, 1, 2],
+    )
+
+    with build(source):
+        handle_after_setup = source._data_file
+
+        for offset, read_shape in [
+            ((0, 0, 0), (10, 10, 10)),
+            ((5, 5, 5), (20, 15, 12)),
+            ((30, 0, 20), (34, 40, 30)),
+        ]:
+            request = BatchRequest()
+            request[key] = Roi(offset, read_shape)
+            batch = source.request_batch(request)
+
+            expected = data[
+                offset[0] : offset[0] + read_shape[0],
+                offset[1] : offset[1] + read_shape[1],
+                offset[2] : offset[2] + read_shape[2],
+            ]
+            assert (batch.arrays[key].data == expected).all()
+
+            # the same handle opened during setup() must still be in use --
+            # not a fresh one reopened for this particular read
+            assert source._data_file is handle_after_setup

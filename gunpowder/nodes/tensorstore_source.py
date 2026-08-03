@@ -198,8 +198,16 @@ class TensorstoreSource(BatchProvider):
         return spec
 
     def setup(self):
-        data_file = self._open_file()
-        spec = self.__read_spec(data_file)
+        # opening a tensorstore dataset re-parses its metadata (zarr array
+        # headers, codec setup, etc.) every time, which is cheap once but
+        # far too slow to redo on every single patch read (measured at
+        # ~0.18s/read in this pipeline, dwarfing every other node). Open
+        # once here and reuse the same handle in provide(). The opened
+        # handle only holds a small JSON-serializable spec, not any actual
+        # array data, so it pickles cheaply into PreCache worker processes.
+        if not hasattr(self, "_data_file"):
+            self._data_file = self._open_file()
+        spec = self.__read_spec(self._data_file)
         self.provides(self.key, spec)
 
     def provide(self, request):
@@ -208,7 +216,9 @@ class TensorstoreSource(BatchProvider):
 
         batch = Batch()
 
-        data_file = self._open_file()
+        if not hasattr(self, "_data_file"):
+            self._data_file = self._open_file()
+        data_file = self._data_file
 
         logger.debug("Reading %s in %s...", self.key, request[self.key].roi)
 
