@@ -1,20 +1,18 @@
 import json
 import logging
 from collections.abc import MutableMapping
-from typing import Union, List
+from typing import List, Optional, Union
 
 import numpy as np
-
-from gunpowder.ext import tensorstore as ts
 
 from gunpowder.array import Array, ArrayKey
 from gunpowder.array_spec import ArraySpec
 from gunpowder.batch import Batch
 from gunpowder.coordinate import Coordinate
+from gunpowder.ext import tensorstore as ts
+from gunpowder.nodes.batch_provider import BatchProvider
 from gunpowder.profiling import Timing
 from gunpowder.roi import Roi
-
-from gunpowder.nodes.batch_provider import BatchProvider
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +64,7 @@ class TensorstoreSource(BatchProvider):
         store: Union[MutableMapping, str],
         array_spec=None,
         flatten_channels: bool = True,
-        dim_order: List[int] = None,
+        dim_order: Optional[List[int]] = None,
     ):
         self.key = key
 
@@ -252,14 +250,16 @@ class TensorstoreSource(BatchProvider):
         c = len(data_file.shape) - self.ndims
 
         slices = roi.to_slices() + (slice(None),) * c
-        # reorder slices according to dim_order
-        slices = tuple([slices[i] for i in self.dim_order])
+        # reorder slices according to dim_order (setup() fills in the default)
+        dim_order = self.dim_order
+        assert dim_order is not None, "dim_order is set in setup()"
+        slices = tuple([slices[i] for i in dim_order])
 
         array = np.asarray(data_file[slices].read().result())
         # If dim_order was not [0, 1, 2] or expected, then transpose by
         # the same to get back to a concordant shape with other datasets
         array = np.transpose(
-            array, axes=[i + self.ndims for i in range(c)] + list(self.dim_order)
+            array, axes=[i + self.ndims for i in range(c)] + list(dim_order)
         )
 
         return array

@@ -90,7 +90,7 @@ class AddVectorMapTestSource(BatchProvider):
             if graph_key == self.postsyn_key:
                 data = data_postsyn
             batch.graphs[graph_key] = Graph(
-                list(data.values()), [], GraphSpec(spec.roi)
+                list(data.values()), [], GraphSpec(spec.roi)  # ty: ignore[missing-union-attribute]
             )
 
         return batch

@@ -11,7 +11,8 @@ from gunpowder import (
     TensorstoreSource,
     build,
 )
-from gunpowder.ext import NoSuchModule, tensorstore as ts
+from gunpowder.ext import NoSuchModule
+from gunpowder.ext import tensorstore as ts
 
 
 @pytest.mark.skipif(isinstance(ts, NoSuchModule), reason="tensorstore is not installed")
