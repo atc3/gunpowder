@@ -21,44 +21,44 @@ class NoSuchModule(object):
 
 
 try:
-    import dvision  # ty: ignore[unresolved-import]
+    import dvision  # ty: ignore[import-not-found]
 except ImportError:
     dvision = NoSuchModule("dvision")
 
 try:
     import h5py
 except ImportError:
-    h5py = NoSuchModule("h5py")  # ty: ignore[invalid-assignment]
+    h5py = NoSuchModule("h5py")
 
 try:
-    import pyklb  # ty: ignore[unresolved-import]
+    import pyklb  # ty: ignore[import-not-found]
 except ImportError:
     pyklb = NoSuchModule("pyklb")
 
 try:
-    import tensorflow  # ty: ignore[unresolved-import]
+    import tensorflow  # ty: ignore[import-not-found]
 except ImportError:
     tensorflow = NoSuchModule("tensorflow")
 
 try:
-    import torch  # ty: ignore[unresolved-import]
+    import torch  # ty: ignore[import-not-found]
 except ImportError:
     torch = NoSuchModule("torch")
 
 try:
-    import tensorboardX  # ty: ignore[unresolved-import]
+    import tensorboardX  # ty: ignore[import-not-found]
 except ImportError:
     tensorboardX = NoSuchModule("tensorboardX")
 
 try:
-    import malis  # ty: ignore[unresolved-import]
+    import malis  # ty: ignore[import-not-found]
 except ImportError:
     malis = NoSuchModule("malis")
 
 try:
     import augment
 except ImportError:
-    augment = NoSuchModule("augment")  # ty: ignore[invalid-assignment]
+    augment = NoSuchModule("augment")
 
 ZarrFile: Optional[Any] = None
 try:
@@ -66,35 +66,35 @@ try:
 
     from .zarr_file import ZarrFile
 except ImportError:
-    zarr = NoSuchModule("zarr")  # ty: ignore[invalid-assignment]
-    ZarrFile = None  # ty: ignore[conflicting-declarations]
+    zarr = NoSuchModule("zarr")
+    ZarrFile = None
 
 try:
-    import daisy  # ty: ignore[unresolved-import]
+    import daisy  # ty: ignore[import-not-found]
 except ImportError:
     daisy = NoSuchModule("daisy")
 
 try:
-    import jax  # ty: ignore[unresolved-import]
+    import jax  # ty: ignore[import-not-found]
 except ImportError:
     jax = NoSuchModule("jax")
 
 try:
-    import jax.numpy as jnp  # ty: ignore[unresolved-import]
+    import jax.numpy as jnp  # ty: ignore[import-not-found]
 except ImportError:
     jnp = NoSuchModule("jnp")
 
 try:
-    import haiku  # ty: ignore[unresolved-import]
+    import haiku  # ty: ignore[import-not-found]
 except ImportError:
     haiku = NoSuchModule("haiku")
 
 try:
-    import optax  # ty: ignore[unresolved-import]
+    import optax  # ty: ignore[import-not-found]
 except ImportError:
-    optax = NoSuchModule("optax")  # type: ignore
+    optax = NoSuchModule("optax")
 
 try:
-    import tensorstore
+    import tensorstore  # ty: ignore[import-not-found]
 except ImportError:
-    tensorstore = NoSuchModule("tensorstore")  # type: ignore
+    tensorstore = NoSuchModule("tensorstore")
