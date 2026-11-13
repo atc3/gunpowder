@@ -4,7 +4,7 @@ import math
 from random import choices, randint, random
 
 import numpy as np
-from scipy.spatial import cKDTree  # ty: ignore[unresolved-import]
+from scipy.spatial import cKDTree  # ty: ignore[import-not-found]
 from skimage.transform import integral_image, integrate
 
 from gunpowder.array import Array

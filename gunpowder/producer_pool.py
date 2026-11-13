@@ -132,7 +132,7 @@ class ProducerPool(object):
             return
 
         self.__stop.set()
-        if self.__watch_dog._popen is not None:  # ty: ignore[unresolved-attribute]
+        if self.__watch_dog._popen is not None:  # ty: ignore[missing-attribute]
             self.__watch_dog.join(timeout=60)
             if self.__watch_dog.is_alive():
                 logger.error(

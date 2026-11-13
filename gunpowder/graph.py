@@ -62,9 +62,9 @@ class Node(Freezable):
         if "__" not in attr:
             return self.attrs[attr]
         else:
-            return super().__getattr__(attr)  # ty: ignore[unresolved-attribute]
+            return super().__getattr__(attr)  # ty: ignore[missing-attribute]
 
-    def __setattr__(self, attr, value):  # ty: ignore[invalid-method-override]
+    def __setattr__(self, attr, value):  # ty: ignore[lost-keyword-for-regular-parameter]
         if "__" not in attr:
             self.attrs[attr] = value
         else:

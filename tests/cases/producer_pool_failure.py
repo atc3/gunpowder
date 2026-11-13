@@ -38,7 +38,9 @@ class HalfWriteThenDie:
     def __call__(self):
         import struct
 
-        writer = self.pool._ProducerPool__result_queue._writer
+        pool = self.pool
+        assert pool is not None, "set .pool before starting the ProducerPool"
+        writer = pool._ProducerPool__result_queue._writer
         os.write(writer.fileno(), struct.pack("!i", 10_000_000) + b"x" * 100)
         os.kill(os.getpid(), signal.SIGKILL)
 

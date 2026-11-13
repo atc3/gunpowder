@@ -39,7 +39,7 @@ class ExampleSourceSqueeze(gp.BatchProvider):
         raw_shape = request[self.raw].roi.shape / self.voxel_size
 
         outputs[self.raw] = gp.Array(
-            np.random.randint(0, 256, raw_shape, dtype=raw_spec.dtype), raw_spec
+            np.random.randint(0, 256, raw_shape, dtype=raw_spec.dtype), raw_spec  # ty: ignore[no-matching-overload]
         )
 
         # Unsqueeze

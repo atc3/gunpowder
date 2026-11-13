@@ -1,7 +1,7 @@
 import logging
 
+import edt  # ty: ignore[import-not-found]
 import numpy as np
-import edt
 
 from gunpowder.array import Array
 from gunpowder.batch import Batch
